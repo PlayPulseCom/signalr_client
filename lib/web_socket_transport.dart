@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'errors.dart';
 import 'itransport.dart';
 import 'utils.dart';
+import 'ihub_protocol.dart';
 
 class WebSocketTransport implements ITransport {
   // Properties
@@ -16,6 +19,7 @@ class WebSocketTransport implements ITransport {
   bool _logMessageContent;
   WebSocketChannel? _webSocket;
   StreamSubscription<Object?>? _webSocketListenSub;
+  MessageHeaders _headers;
 
   @override
   OnClose? onClose;
@@ -24,11 +28,15 @@ class WebSocketTransport implements ITransport {
   OnReceive? onReceive;
 
   // Methods
-  WebSocketTransport(AccessTokenFactory? accessTokenFactory, Logger? logger,
-      bool logMessageContent)
-      : this._accessTokenFactory = accessTokenFactory,
+  WebSocketTransport(
+    AccessTokenFactory? accessTokenFactory,
+    Logger? logger,
+    bool logMessageContent,
+    MessageHeaders headers,
+  )   : this._accessTokenFactory = accessTokenFactory,
         this._logger = logger,
-        this._logMessageContent = logMessageContent;
+        this._logMessageContent = logMessageContent,
+        this._headers = headers;
 
   @override
   Future<void> connect(String? url, TransferFormat transferFormat) async {
@@ -50,7 +58,11 @@ class WebSocketTransport implements ITransport {
     var opened = false;
     url = url!.replaceFirst('http', 'ws');
     _logger?.finest("WebSocket try connecting to '$url'.");
-    _webSocket = WebSocketChannel.connect(Uri.parse(url));
+    if (kIsWeb){
+      _webSocket = WebSocketChannel.connect(Uri.parse(url));
+    } else {
+      _webSocket = IOWebSocketChannel.connect(Uri.parse(url), headers: _headers.asMap);
+    }
     opened = true;
     if (!websocketCompleter.isCompleted) websocketCompleter.complete();
     _logger?.info("WebSocket connected to '$url'.");

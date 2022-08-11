@@ -46,14 +46,16 @@ String formatArrayBuffer(Uint8List data) {
 }
 
 Future<void> sendMessage(
-    Logger? logger,
-    String transportName,
-    SignalRHttpClient httpClient,
-    String? url,
-    AccessTokenFactory? accessTokenFactory,
-    Object content,
-    bool logMessageContent) async {
-  MessageHeaders headers = MessageHeaders();
+  Logger? logger,
+  String transportName,
+  SignalRHttpClient httpClient,
+  String? url,
+  AccessTokenFactory? accessTokenFactory,
+  Object content,
+  bool logMessageContent, {
+  MessageHeaders? headers,
+}) async {
+  headers ??= MessageHeaders();
   if (accessTokenFactory != null) {
     final token = await accessTokenFactory();
     if (!isStringEmpty(token)) {

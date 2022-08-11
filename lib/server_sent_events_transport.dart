@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:sse_client/sse_client.dart';
 
 import 'errors.dart';
+import 'ihub_protocol.dart';
 import 'itransport.dart';
 import 'signalr_http_client.dart';
 import 'utils.dart';
@@ -15,6 +16,8 @@ class ServerSentEventsTransport implements ITransport {
 
   final Logger? _logger;
   final bool _logMessageContent;
+  final MessageHeaders _headers;
+
   SseClient? _sseClient;
   String? _url;
 
@@ -25,14 +28,16 @@ class ServerSentEventsTransport implements ITransport {
   OnReceive? onReceive;
 
   ServerSentEventsTransport(
-      SignalRHttpClient httpClient,
-      AccessTokenFactory? accessTokenFactory,
-      Logger? logger,
-      bool logMessageContent)
-      : _httpClient = httpClient,
+    SignalRHttpClient httpClient,
+    AccessTokenFactory? accessTokenFactory,
+    Logger? logger,
+    bool logMessageContent,
+    MessageHeaders headers,
+  )   : _httpClient = httpClient,
         _accessTokenFactory = accessTokenFactory,
         _logger = logger,
-        _logMessageContent = logMessageContent;
+        _logMessageContent = logMessageContent,
+        _headers = headers;
 
   // Methods
   @override
@@ -102,6 +107,7 @@ class ServerSentEventsTransport implements ITransport {
       _accessTokenFactory,
       data,
       _logMessageContent,
+      headers: _headers,
     );
   }
 

@@ -16,6 +16,7 @@ class LongPollingTransport implements ITransport {
   final Logger? _logger;
   final bool _logMessageContent;
   final AbortController _pollAbort;
+  final MessageHeaders _headers;
 
   bool? get pollAborted => _pollAbort.aborted;
 
@@ -33,14 +34,16 @@ class LongPollingTransport implements ITransport {
   // Methods
 
   LongPollingTransport(
-      SignalRHttpClient httpClient,
-      AccessTokenFactory? accessTokenFactory,
-      Logger? logger,
-      bool logMessageContent)
-      : _httpClient = httpClient,
+    SignalRHttpClient httpClient,
+    AccessTokenFactory? accessTokenFactory,
+    Logger? logger,
+    bool logMessageContent,
+    MessageHeaders headers,
+  )   : _httpClient = httpClient,
         _accessTokenFactory = accessTokenFactory,
         _logger = logger,
         _logMessageContent = logMessageContent,
+        _headers = headers,
         _pollAbort = AbortController() {
     _running = false;
   }
@@ -158,8 +161,16 @@ class LongPollingTransport implements ITransport {
       return Future.error(
           new GeneralError("Cannot send until the transport is connected"));
     }
-    await sendMessage(_logger, "LongPolling", _httpClient, _url,
-        _accessTokenFactory, data, _logMessageContent);
+    await sendMessage(
+      _logger,
+      "LongPolling",
+      _httpClient,
+      _url,
+      _accessTokenFactory,
+      data,
+      _logMessageContent,
+      headers: _headers,
+    );
   }
 
   @override
