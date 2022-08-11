@@ -47,10 +47,12 @@ class WebSocketTransport implements ITransport {
     if (_accessTokenFactory != null) {
       final token = await _accessTokenFactory!();
       if (!isStringEmpty(token)) {
-        final encodedToken = Uri.encodeComponent(token);
-        url = url! +
-            (url.indexOf("?") < 0 ? "?" : "&") +
-            "access_token=$encodedToken";
+        if (kIsWeb) {
+          final encodedToken = Uri.encodeComponent(token);
+          url = url! + (url.indexOf("?") < 0 ? "?" : "&") + "access_token=$encodedToken";
+        } else {
+          _headers.setHeaderValue("Authorization", "Bearer " + token);
+        }
       }
     }
 
@@ -58,7 +60,7 @@ class WebSocketTransport implements ITransport {
     var opened = false;
     url = url!.replaceFirst('http', 'ws');
     _logger?.finest("WebSocket try connecting to '$url'.");
-    if (kIsWeb){
+    if (kIsWeb) {
       _webSocket = WebSocketChannel.connect(Uri.parse(url));
     } else {
       _webSocket = IOWebSocketChannel.connect(Uri.parse(url), headers: _headers.asMap);
