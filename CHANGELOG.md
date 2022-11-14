@@ -1,3 +1,15 @@
+## [1.3.3]
+
+* Allowing invocation arguments to be null
+
+## [1.3.2]
+
+* Fix broken authorization in SSE (Server Side Events) transport
+
+## [1.3.1]
+
+* Add MessagePack with WEB support.
+
 ## [1.3.0]
 
 * Add Msgpack support and added some tests.
